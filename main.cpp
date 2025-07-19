@@ -208,9 +208,9 @@ int wmain() {
         std::wcout << L"Gothic II detected.\n";
 
         downloads = {
-            {L"https://www.worldofgothic.de/download.php?id=15", L"gothic_patch_108k.exe"},
-            {L"https://www.worldofgothic.de/download.php?id=61", L"gothic1_playerkit-1.08k.exe"},
-            {L"https://www.worldofgothic.de/download.php?id=1523", L"G1Classic-SystemPack-1.8.exe"},
+            {L"https://www.worldofgothic.de/download.php?id=833", L"gothic2_fix-2.6.0.0-rev2.exe"},
+            {L"https://www.worldofgothic.de/download.php?id=518", L"gothic2_playerkit-2.6f.exe"},
+            {L"https://www.worldofgothic.de/download.php?id=1525", L"G2NoTR-SystemPack-1.8.exe"},
             {L"https://github.com/kirides/GD3D11/releases/download/v17.8-dev26/GD3D11-v17.8-dev26.zip", L"GD3D11-v17.8-dev26.zip"},
             {L"https://www.worldofgothic.de/download.php?id=1509", L"Normalmaps_Original.zip"},
             {L"https://www.dropbox.com/s/ssx2lfvct0ewdo6/Carnage_Graphics_Patch_G2.vdf?dl=1", L"Carnage_Graphics_Patch_G2.vdf"}
@@ -220,9 +220,9 @@ int wmain() {
         std::wcout << L"Gothic I detected.\n";
 
         downloads = {
-            {L"https://www.worldofgothic.de/download.php?id=833", L"gothic2_fix-2.6.0.0-rev2.exe"},
-            {L"https://www.worldofgothic.de/download.php?id=518", L"gothic2_playerkit-2.6f.exe"},
-            {L"https://www.worldofgothic.de/download.php?id=1525", L"G2NoTR-SystemPack-1.8.exe"},
+            {L"https://www.worldofgothic.de/download.php?id=15", L"gothic_patch_108k.exe"},
+            {L"https://www.worldofgothic.de/download.php?id=61", L"gothic1_playerkit-1.08k.exe"},
+            {L"https://www.worldofgothic.de/download.php?id=1523", L"G1Classic-SystemPack-1.8.exe"},
             {L"https://github.com/kirides/GD3D11/releases/download/v17.8-dev26/GD3D11-v17.8-dev26.zip", L"GD3D11-v17.8-dev26.zip"},
             {L"https://www.dropbox.com/s/4waamw0di358vz3/Carnage_Graphics_patch.VDF?dl=1", L"Carnage_Graphics_patch.VDF"}
         };
@@ -337,9 +337,40 @@ int wmain() {
             return 1;
         }
 
+        // After extracting the tar.gz archive...
         if (!ExtractTarGz(dxvkArchive, systemDir)) {
             std::wcerr << L"Failed to extract DXVK archive.\n";
             return 1;
+        }
+
+        // Construct path to the extracted folder and the x32 subfolder
+        fs::path extractedDir = systemDir / L"dxvk-2.6.2" / L"x32";
+
+        // Files to copy
+        std::vector<fs::path> dllFiles = {
+            extractedDir / L"d3d11.dll",
+            extractedDir / L"dxgi.dll"
+        };
+
+        for (const auto& dllFile : dllFiles) {
+            fs::path destFile = systemDir / dllFile.filename();
+            try {
+                fs::copy_file(dllFile, destFile, fs::copy_options::overwrite_existing);
+                std::wcout << L"Copied " << dllFile.filename().wstring() << L" to " << destFile.wstring() << L"\n";
+            }
+            catch (const fs::filesystem_error& e) {
+                std::wcerr << L"Failed to copy " << dllFile.filename().wstring() << L": " << e.what() << L"\n";
+                return 1;
+            }
+        }
+
+        // Clean up extracted folder if you want
+        try {
+            fs::remove_all(systemDir / L"dxvk-2.6.2");
+            std::wcout << L"Deleted extracted dxvk folder.\n";
+        }
+        catch (const fs::filesystem_error& e) {
+            std::wcerr << L"Failed to delete extracted folder: " << e.what() << L"\n";
         }
 
         try {
