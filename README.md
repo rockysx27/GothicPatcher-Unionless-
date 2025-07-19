@@ -19,7 +19,7 @@ This autopatcher automates the download, extraction, and setup of essential patc
 - Detects AMD GPUs and installs the `dvzk 32bit` Direct3D 11 driver if needed.
 - Applies the 4GB RAM patch.
 - Downloads and moves `FCH_Models_G1.VDF` to `Gothic/Data` for improved head meshes.
-- Updates the `Gothic.ini` configuration file.
+- Updates the `Gothic.ini` configuration file and `UserSettings.ini` for GD3D11.
 
 ### Gothic II
 
@@ -31,7 +31,7 @@ This autopatcher automates the download, extraction, and setup of essential patc
 - Applies the 4GB RAM patch.
 - Downloads and extracts `Normalmaps_Original.zip` to `Gothic II/System/GD3D11/textures/replacements`.
 - Downloads and moves `FCH_Models_G2.VDF` to `Gothic II/Data` for improved head meshes.
-- Updates the `Gothic.ini` configuration file.
+- Updates the `Gothic.ini` configuration file and `UserSettings.ini` for GD3D11.
 
 ---
 
