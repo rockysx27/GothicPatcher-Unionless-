@@ -198,12 +198,32 @@ int wmain() {
         std::wstring filename;
     };
 
-    std::vector<DownloadItem> downloads = {
-        {L"https://www.worldofgothic.de/download.php?id=15", L"gothic_patch_108k.exe"},
-        {L"https://www.worldofgothic.de/download.php?id=61", L"gothic1_playerkit-1.08k.exe"},
-        {L"https://www.worldofgothic.de/download.php?id=1523", L"G1Classic-SystemPack-1.8.exe"},
-        {L"https://github.com/kirides/GD3D11/releases/download/v17.8-dev26/GD3D11-v17.8-dev26.zip", L"GD3D11-v17.8-dev26.zip"}
-    };
+    bool isGothic2 = gothicPath.filename().wstring().find(L"Gothic II") != std::wstring::npos;
+    std::vector<DownloadItem> downloads;
+
+    if (isGothic2) {
+        std::wcout << L"Gothic II detected.\n";
+
+        downloads = {
+            {L"https://www.worldofgothic.de/download.php?id=15", L"gothic_patch_108k.exe"},
+            {L"https://www.worldofgothic.de/download.php?id=61", L"gothic1_playerkit-1.08k.exe"},
+            {L"https://www.worldofgothic.de/download.php?id=1523", L"G1Classic-SystemPack-1.8.exe"},
+            {L"https://github.com/kirides/GD3D11/releases/download/v17.8-dev26/GD3D11-v17.8-dev26.zip", L"GD3D11-v17.8-dev26.zip"},
+            {L"https://www.worldofgothic.de/download.php?id=1509", L"Normalmaps_Original.zip"},
+            {L"https://www.dropbox.com/s/ssx2lfvct0ewdo6/Carnage_Graphics_Patch_G2.vdf?dl=1", L"Carnage_Graphics_Patch_G2.vdf"}
+
+        };
+    } else {
+        std::wcout << L"Gothic I detected.\n";
+
+        downloads = {
+            {L"https://www.worldofgothic.de/download.php?id=833", L"gothic2_fix-2.6.0.0-rev2.exe"},
+            {L"https://www.worldofgothic.de/download.php?id=518", L"gothic2_playerkit-2.6f.exe"},
+            {L"https://www.worldofgothic.de/download.php?id=1525", L"G2NoTR-SystemPack-1.8.exe"},
+            {L"https://github.com/kirides/GD3D11/releases/download/v17.8-dev26/GD3D11-v17.8-dev26.zip", L"GD3D11-v17.8-dev26.zip"},
+            {L"https://www.dropbox.com/s/4waamw0di358vz3/Carnage_Graphics_patch.VDF?dl=1", L"Carnage_Graphics_patch.VDF"}
+        };
+    }
 
     for (const auto& item : downloads) {
         fs::path outFile = gothicPath / item.filename;
@@ -229,14 +249,36 @@ int wmain() {
             }
         }
     }
+    //ADD CARNAGE MODELS
+    // Move Carnage VDF into Data directory
+    fs::path carnageVdf = gothicPath / (isGothic2 ? L"Carnage_Graphics_Patch_G2.vdf" : L"Carnage_Graphics_patch.VDF");
+    fs::path dataDir = gothicPath / L"Data";
+    fs::path targetVdf = dataDir / carnageVdf.filename();
+
+    try {
+        if (!fs::exists(dataDir)) {
+            fs::create_directory(dataDir);
+        }
+
+        fs::rename(carnageVdf, targetVdf);
+        std::wcout << L"Moved " << carnageVdf.filename().wstring() << L" to " << targetVdf.wstring() << L"\n";
+    } catch (const fs::filesystem_error& e) {
+        std::wcerr << L"Failed to move VDF file: " << e.what() << L"\n";
+        // Not fatal
+    }
 
 
-    // Step 4: Set LARGE_ADDRESS_AWARE flag in gothic/system/GOTHIC.exe
-    fs::path gothicExe = gothicPath / L"system" / L"GOTHIC.exe";
+
+    // Step 4: Set LARGE_ADDRESS_AWARE flag in gothic/system/{GOTHIC.exe | Gothic2.exe}
+    fs::path gothicExe = isGothic2
+        ? gothicPath / L"system" / L"Gothic2.exe"
+        : gothicPath / L"system" / L"GOTHIC.exe";
+
     if (!fs::exists(gothicExe)) {
-        std::wcerr << L"GOTHIC.exe not found in system directory.\n";
+        std::wcerr << (isGothic2 ? L"Gothic2.exe" : L"GOTHIC.exe") << L" not found in system directory.\n";
         return 1;
     }
+
 
     if (!SetLargeAddressAware(gothicExe)) {
         std::wcerr << L"Failed to set LARGE_ADDRESS_AWARE flag.\n";
@@ -258,6 +300,26 @@ int wmain() {
     }
     catch (const fs::filesystem_error& e) {
         std::wcerr << L"Failed to delete " << gd3d11Zip.wstring() << L": " << e.what() << L"\n";
+    }
+
+    //If GOTHIC 2 ADD REPLACEMENT MESHES for GD3D11
+    if (isGothic2) {
+        // Step 5.5: Extract maps zip to system\GD3D11\textures\replacements
+        fs::path replaceZip = gothicPath / L"Normalmaps_Original.zip";
+        fs::path systemReplaceDir = gothicPath / L"system/GD3D11/textures/replacements";
+
+         if (!ExtractZip(replaceZip, systemReplaceDir)) {
+            std::wcerr << L"Failed to extract Normalmaps_Original.\n";
+            return 1;
+        }
+
+        try {
+            fs::remove(replaceZip);
+            std::wcout << L"Deleted archive " << replaceZip.wstring() << L"\n";
+        }
+        catch (const fs::filesystem_error& e) {
+            std::wcerr << L"Failed to delete " << replaceZip.wstring() << L": " << e.what() << L"\n";
+        }
     }
 
 
