@@ -217,7 +217,7 @@ int wmain() {
             {L"https://github.com/GothicFixTeam/GothicFix/releases/download/v1.9pre2/Vdfs32g.zip", L"Vdfs32g.zip"},
             {L"https://github.com/kirides/GD3D11/releases/download/v17.8-dev26/GD3D11-v17.8-dev26.zip", L"GD3D11-v17.8-dev26.zip"},
             {L"https://www.worldofgothic.de/download.php?id=1509", L"Normalmaps_Original.zip"},
-            {L"https://github.com/rockysx27/carnagec/releases/download/g1/FCH_Models_G1.vdf", L"FCH_Models_G1.vdf"}
+            {L"https://github.com/rockysx27/carnagec/releases/download/g2/FCH_Models_G2.vdf", L"FCH_Models_G2.vdf"}
 
         };
     } else {
@@ -229,7 +229,7 @@ int wmain() {
             {L"https://www.worldofgothic.de/download.php?id=1523", L"G1Classic-SystemPack-1.8.exe"},
             {L"https://github.com/GothicFixTeam/GothicFix/releases/download/v1.9pre2/Vdfs32g.zip", L"Vdfs32g.zip"},
             {L"https://github.com/kirides/GD3D11/releases/download/v17.8-dev26/GD3D11-v17.8-dev26.zip", L"GD3D11-v17.8-dev26.zip"},
-            {L"https://github.com/rockysx27/carnagec/releases/download/g2/FCH_Models_G2.vdf", L"FCH_Models_G2.vdf"}
+            {L"https://github.com/rockysx27/carnagec/releases/download/g1/FCH_Models_G1.vdf", L"FCH_Models_G1.vdf"}
         };
     }
 
