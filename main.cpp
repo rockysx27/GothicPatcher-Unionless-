@@ -217,7 +217,9 @@ int wmain() {
             {L"https://github.com/GothicFixTeam/GothicFix/releases/download/v1.9pre2/Vdfs32g.zip", L"Vdfs32g.zip"},
             {L"https://github.com/kirides/GD3D11/releases/download/v17.8-dev26/GD3D11-v17.8-dev26.zip", L"GD3D11-v17.8-dev26.zip"},
             {L"https://www.worldofgothic.de/download.php?id=1509", L"Normalmaps_Original.zip"},
-            {L"https://github.com/rockysx27/carnagec/releases/download/g2/FCH_Models_G2.vdf", L"FCH_Models_G2.vdf"}
+            {L"https://github.com/rockysx27/carnagec/releases/download/g2/FCH_Models_G2.vdf", L"FCH_Models_G2.vdf"},
+            {L"https://github.com/rockysx27/carnagec/releases/download/g2/Gothic.ini", L"Gothic.ini"},
+            {L"https://github.com/rockysx27/carnagec/releases/download/g2/UserSettings.ini", L"UserSettings.ini"}
 
         };
     } else {
@@ -229,7 +231,9 @@ int wmain() {
             {L"https://www.worldofgothic.de/download.php?id=1523", L"G1Classic-SystemPack-1.8.exe"},
             {L"https://github.com/GothicFixTeam/GothicFix/releases/download/v1.9pre2/Vdfs32g.zip", L"Vdfs32g.zip"},
             {L"https://github.com/kirides/GD3D11/releases/download/v17.8-dev26/GD3D11-v17.8-dev26.zip", L"GD3D11-v17.8-dev26.zip"},
-            {L"https://github.com/rockysx27/carnagec/releases/download/g1/FCH_Models_G1.vdf", L"FCH_Models_G1.vdf"}
+            {L"https://github.com/rockysx27/carnagec/releases/download/g1/FCH_Models_G1.vdf", L"FCH_Models_G1.vdf"},
+            {L"https://github.com/rockysx27/carnagec/releases/download/g1/Gothic.ini", L"Gothic.ini"},
+            {L"https://github.com/rockysx27/carnagec/releases/download/g1/UserSettings.ini", L"UserSettings.ini"}
         };
     }
 
@@ -408,6 +412,44 @@ int wmain() {
     } else {
         std::wcout << L"Non-AMD GPU detected, skipping DXVK.\n";
     }
+
+    //Gothic.ini
+    fs::path iniX = gothicPath / L"Gothic.ini";
+    fs::path dataDirX = gothicPath / L"System";
+    fs::path targetVdfX = dataDirX / iniX.filename();
+
+    try {
+        if (!fs::exists(dataDirX)) {
+            fs::create_directory(dataDirX);
+        }
+
+        fs::rename(iniX, targetVdfX);
+        std::wcout << L"Moved " << iniX.filename().wstring() << L" to " << targetVdfX.wstring() << L"\n";
+    }
+    catch (const fs::filesystem_error& e) {
+        std::wcerr << L"Failed to move VDF file: " << e.what() << L"\n";
+        // Not fatal
+    }
+
+	//GD3D11/UserSettings.ini
+    fs::path iniY = gothicPath / L"UserSettings.ini";
+    fs::path dataDirY = gothicPath / L"System/GD3D11";
+    fs::path targetVdfY = dataDirY / iniY.filename();
+
+    try {
+        if (!fs::exists(dataDirY)) {
+            fs::create_directories(dataDirY);
+        }
+
+
+        fs::rename(iniY, targetVdfY);
+        std::wcout << L"Moved " << iniY.filename().wstring() << L" to " << targetVdfY.wstring() << L"\n";
+    }
+    catch (const fs::filesystem_error& e) {
+        std::wcerr << L"Failed to move VDF file: " << e.what() << L"\n";
+        // Not fatal
+    }
+
 
     std::wcout << L"All done.\n";
 
