@@ -264,7 +264,7 @@ int wmain() {
 
     //ADD CARNAGE MODELS
     // Move Carnage VDF into Data directory
-    fs::path carnageVdf = gothicPath / (isGothic2 ? L"Carnage_Graphics_Patch_G2.vdf" : L"Carnage_Graphics_patch.VDF");
+    fs::path carnageVdf = gothicPath / (isGothic2 ? L"FCH_Models_G2.vdf" : L"FCH_Models_G1.VDF");
     fs::path dataDir = gothicPath / L"Data";
     fs::path targetVdf = dataDir / carnageVdf.filename();
 
