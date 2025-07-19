@@ -139,11 +139,16 @@ bool RunCommandAndWait(const std::wstring& cmd) {
     return true;
 }
 
-// Extract ZIP archive with powershell
+// Extract ZIP archive with PowerShell and ensure destination is fully overwritten
 bool ExtractZip(const fs::path& zipPath, const fs::path& destDir) {
-    std::wstring cmd = L"powershell -Command \"Expand-Archive -LiteralPath '" + zipPath.wstring() + L"' -DestinationPath '" + destDir.wstring() + L"' -Force\"";
+    std::wstring cmd =
+        L"powershell -Command \""
+        L"if (Test-Path '" + destDir.wstring() + L"') { Remove-Item -Recurse -Force '" + destDir.wstring() + L"\\*' } ; "
+        L"Expand-Archive -LiteralPath '" + zipPath.wstring() + L"' -DestinationPath '" + destDir.wstring() + L"' -Force"
+        L"\"";
     return RunCommandAndWait(cmd);
 }
+
 
 // Extract tar.gz archive with powershell (needs at least Windows 10)
 bool ExtractTarGz(const fs::path& archivePath, const fs::path& destDir) {
@@ -211,6 +216,7 @@ int wmain() {
             {L"https://www.worldofgothic.de/download.php?id=833", L"gothic2_fix-2.6.0.0-rev2.exe"},
             {L"https://www.worldofgothic.de/download.php?id=518", L"gothic2_playerkit-2.6f.exe"},
             {L"https://www.worldofgothic.de/download.php?id=1525", L"G2NoTR-SystemPack-1.8.exe"},
+            {L"https://github.com/GothicFixTeam/GothicFix/releases/download/v1.9pre2/Vdfs32g.zip", L"Vdfs32g.zip"},
             {L"https://github.com/kirides/GD3D11/releases/download/v17.8-dev26/GD3D11-v17.8-dev26.zip", L"GD3D11-v17.8-dev26.zip"},
             {L"https://www.worldofgothic.de/download.php?id=1509", L"Normalmaps_Original.zip"},
             {L"https://dl.dropboxusercontent.com/s/ssx2lfvct0ewdo6/Carnage_Graphics_Patch_G2.vdf", L"Carnage_Graphics_Patch_G2.vdf"}
@@ -223,6 +229,7 @@ int wmain() {
             {L"https://www.worldofgothic.de/download.php?id=15", L"gothic_patch_108k.exe"},
             {L"https://www.worldofgothic.de/download.php?id=61", L"gothic1_playerkit-1.08k.exe"},
             {L"https://www.worldofgothic.de/download.php?id=1523", L"G1Classic-SystemPack-1.8.exe"},
+            {L"https://github.com/GothicFixTeam/GothicFix/releases/download/v1.9pre2/Vdfs32g.zip", L"Vdfs32g.zip"},
             {L"https://github.com/kirides/GD3D11/releases/download/v17.8-dev26/GD3D11-v17.8-dev26.zip", L"GD3D11-v17.8-dev26.zip"},
             {L"https://dl.dropboxusercontent.com/s/4waamw0di358vz3/Carnage_Graphics_patch.VDF", L"Carnage_Graphics_patch.VDF"}
         };
@@ -269,8 +276,22 @@ int wmain() {
         std::wcerr << L"Failed to move VDF file: " << e.what() << L"\n";
         // Not fatal
     }
+	// Step 3.5: Extract Vdfs32g zip to gothic/system
+    fs::path replaceZipX = gothicPath / L"Vdfs32g.zip";
+    fs::path systemReplaceDirX = gothicPath / L"system";
 
+    if (!ExtractZip(replaceZipX, systemReplaceDirX)) {
+        std::wcerr << L"Failed to extract Vdfs32g.\n";
+        return 1;
+    }
 
+    try {
+        fs::remove(replaceZipX);
+        std::wcout << L"Deleted archive " << replaceZipX.wstring() << L"\n";
+    }
+    catch (const fs::filesystem_error& e) {
+        std::wcerr << L"Failed to delete " << replaceZipX.wstring() << L": " << e.what() << L"\n";
+    }
 
     // Step 4: Set LARGE_ADDRESS_AWARE flag in gothic/system/{GOTHIC.exe | Gothic2.exe}
     fs::path gothicExe = isGothic2
